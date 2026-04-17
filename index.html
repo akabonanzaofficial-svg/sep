@@ -43,7 +43,24 @@
             overflow: hidden;
         }
     </style>
-<script src="[https://identity.netlify.com/v1/netlify-identity-widget.js](https://identity.netlify.com/v1/netlify-identity-widget.js)"></script>
+    
+    <!-- WIDGET NETLIFY IDENTITY DENGAN URL SPESIFIK -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script>
+        // PENTING: Ganti link di bawah ini dengan URL Netlify Anda!
+        // Pastikan akhiran /.netlify/identity tetap ada.
+        window.addEventListener('load', function() {
+            if (window.netlifyIdentity) {
+                try {
+                    window.netlifyIdentity.init({
+                        APIUrl: "https://NAMA-WEB-ANDA-DI.netlify.app/.netlify/identity" 
+                    });
+                } catch (error) {
+                    console.error("Netlify Identity init error:", error);
+                }
+            }
+        });
+    </script>
 </head>
 <body class="font-sans text-gray-800 bg-gray-50 min-h-screen flex flex-col">
 
@@ -298,7 +315,7 @@
                     <!-- Right Side: Form -->
                     <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 border-t-8 border-t-blue-600">
                         <h3 class="text-2xl font-bold text-gray-900 mb-6">Kirim Pesan Cepat</h3>
-                        <form class="space-y-5" onsubmit="event.preventDefault(); alert('Pesan berhasil terkirim!');">
+                        <form class="space-y-5" onsubmit="event.preventDefault(); document.getElementById('success-msg').classList.remove('hidden'); this.reset(); setTimeout(() => document.getElementById('success-msg').classList.add('hidden'), 3000);">
                             <div>
                                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Nama Lengkap</label>
                                 <input type="text" placeholder="Haji Ahmad" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all outline-none">
@@ -312,6 +329,9 @@
                                 <textarea rows="4" placeholder="Tulis pesan Anda..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all outline-none"></textarea>
                             </div>
                             <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 shadow-lg active:scale-95 transition-all">Kirim Sekarang</button>
+                            <div id="success-msg" class="hidden mt-4 p-3 bg-green-100 text-green-700 rounded-xl text-center text-sm font-bold border border-green-200">
+                                Pesan Anda berhasil terkirim!
+                            </div>
                         </form>
                     </div>
                 </div>
