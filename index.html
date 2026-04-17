@@ -47,13 +47,12 @@
     <!-- WIDGET NETLIFY IDENTITY DENGAN URL SPESIFIK -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
-        // PENTING: Ganti link di bawah ini dengan URL Netlify Anda!
-        // Pastikan akhiran /.netlify/identity tetap ada.
         window.addEventListener('load', function() {
             if (window.netlifyIdentity) {
                 try {
                     window.netlifyIdentity.init({
-                        APIUrl: "https://NAMA-WEB-ANDA-DI.netlify.app/.netlify/identity" 
+                        // PENTING: Masukkan URL Netlify Anda di bawah ini
+                        APIUrl: "https://ALAMAT-NETLIFY-ANDA-YANG-BARU.netlify.app/.netlify/identity" 
                     });
                 } catch (error) {
                     console.error("Netlify Identity init error:", error);
