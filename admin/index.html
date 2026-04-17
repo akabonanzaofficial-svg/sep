@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Admin - Serikat Ekonomi Pesantren</title>
+  
+  <!-- Widget Netlify Identity untuk Sistem Login -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+  <script>
+    // PENTING: Mencegah CMS mencari file config.yml eksternal secara otomatis saat script dimuat.
+    // Ini menghilangkan error "Failed to load config.yml".
+    window.CMS_MANUAL_INIT = true;
+  </script>
+
+  <!-- Script Utama Decap CMS -->
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+  <script>
+    // METODE MANUAL INIT: 
+    // Menghindari error pemuatan file eksternal. Konfigurasi langsung disematkan di sini.
+    CMS.init({
+      config: {
+        backend: {
+          name: 'github',
+          repo: 'NAMA_USERNAME_ANDA/NAMA_REPOSITORY_ANDA', // PENTING: Ganti dengan akun GitHub Anda nanti
+          branch: 'main' // Ubah ke 'master' jika branch utama Anda bernama master
+        },
+        
+        // Pengaturan penyimpanan gambar (media)
+        media_folder: 'images/uploads',
+        public_folder: '/images/uploads',
+        
+        // Mode editorial untuk fitur Draft/Review (Opsional tapi direkomendasikan)
+        publish_mode: 'editorial_workflow',
+        
+        // Pengaturan Form/Input Berita
+        collections: [
+          {
+            name: 'berita',
+            label: 'Daftar Berita',
+            folder: 'content/berita', // Folder tempat berita akan disimpan di GitHub
+            create: true,
+            slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
+            format: 'json', // Menyimpan dalam format JSON agar mudah dibaca oleh Javascript website kita
+            fields: [
+              { label: 'Judul Berita', name: 'judul', widget: 'string' },
+              { label: 'Tanggal', name: 'tanggal', widget: 'datetime', format: 'DD MMMM YYYY', date_format: 'DD MMMM YYYY', time_format: false },
+              { label: 'Gambar Utama', name: 'gambar', widget: 'image', required: false },
+              { label: 'Ringkasan', name: 'ringkasan', widget: 'text', hint: 'Teks singkat yang muncul di halaman depan (maks 2 kalimat).' },
+              { label: 'Isi Berita Lengkap', name: 'body', widget: 'markdown' }
+            ]
+          }
+        ]
+      }
+    });
+
+    // Logika Pengalihan Otomatis Setelah Login
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", user => {
+        if (!user) {
+          window.netlifyIdentity.on("login", () => {
+            document.location.href = "/admin/";
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>
