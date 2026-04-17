@@ -13,17 +13,20 @@
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
   <script>
-    // 1. KITA BERITAHU SISTEM DI MANA PINTU LOGIN NETLIFY BERADA
-    // PENTING: Ganti link di bawah ini dengan URL Netlify Anda sendiri!
+    // ====================================================================
+    // 1. GANTI LINK DI BAWAH INI DENGAN URL NETLIFY ANDA!
+    // (Penting: Biarkan akhiran /.netlify/identity tetap ada)
+    // ====================================================================
     netlifyIdentity.init({
       APIUrl: "https://website-sep.netlify.app/.netlify/identity" 
     });
 
-    // 2. KONFIGURASI CMS
+
+    // 2. KONFIGURASI CMS (Tidak perlu mengubah nama GitHub/Repo lagi)
     CMS.init({
       config: {
         backend: {
-          name: 'git-gateway', // Berubah menjadi git-gateway karena kita menggunakan Netlify Identity
+          name: 'git-gateway', 
           branch: 'main' // Ubah ke 'master' jika branch GitHub Anda bernama master
         },
         
