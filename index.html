@@ -414,24 +414,44 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // NEWS SYSTEM DATA
-        const dataBerita = [
-            { id: 1, judul: "Membangun Ekosistem Ekonomi Pesantren Terintegrasi", tanggal: "16 April 2026", ringkasan: "Langkah strategis SEP dalam menyatukan potensi ekonomi ribuan pesantren di Jawa Barat melalui logistik bersama.", gambar: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&q=80" },
-            { id: 2, judul: "Workshop Santripreneur Batch 10 Sukses Digelar", tanggal: "12 April 2026", ringkasan: "Lebih dari 100 santri mengikuti pelatihan intensif digital marketing dan literasi keuangan syariah.", gambar: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80" },
-            { id: 3, judul: "Sinergi Strategis dengan Perbankan Syariah", tanggal: "10 April 2026", ringkasan: "Penandatanganan MoU akses permodalan mudah bagi UMKM binaan pesantren di wilayah Priangan Timur.", gambar: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=400&q=80" },
-            { id: 4, judul: "Kunjungan Studi Banding Al-Ittifaq", tanggal: "05 April 2026", ringkasan: "Melihat keberhasilan unit usaha pertanian modern dan distribusi sayuran skala nasional.", gambar: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80" },
-            { id: 5, judul: "Inovasi Produk Pangan Santri Naik Kelas", tanggal: "01 April 2026", ringkasan: "Produk keripik santri kini masuk ke jaringan ritel modern melalui kurasi ketat tim SEP.", gambar: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&q=80" },
-            { id: 6, judul: "Peluncuran Platform SEP-Mart Online", tanggal: "28 Maret 2026", ringkasan: "Mudahnya belanja produk asli pesantren langsung dari genggaman tangan secara aman dan halal.", gambar: "https://images.unsplash.com/photo-1605648916319-cf082f7524a1?w=400&q=80" }
-        ];
-
+        // =======================================================
+        // NEWS SYSTEM DATA (MENYEDOT DARI SHEETDB)
+        // =======================================================
+        const sheetDB_URL = "https://sheetdb.io/api/v1/qwp7ldnxe073c"; 
+        let dataBerita = [];
         let currentPage = 1;
-        const itemsPerPage = 5; // 1 Utama + 4 Grid
+        const itemsPerPage = 5;
+
+        // Panggil data saat halaman pertama kali dimuat
+        window.addEventListener('DOMContentLoaded', loadBeritaData);
+
+        async function loadBeritaData() {
+            try {
+                const response = await fetch(sheetDB_URL);
+                const data = await response.json();
+                
+                // Pastikan yang diambil hanya baris yang ada isinya, lalu balikkan urutan (terbaru di atas)
+                dataBerita = data.filter(b => b.id && b.judul).reverse();
+                
+                renderBerita();
+            } catch (e) {
+                console.error("Gagal menyedot data berita:", e);
+                document.getElementById('berita-utama-container').innerHTML = '<p class="text-center text-red-500 w-full py-10">Gagal memuat berita. Periksa koneksi atau URL API.</p>';
+            }
+        }
 
         function renderBerita() {
             const utContainer = document.getElementById('berita-utama-container');
             const grContainer = document.getElementById('berita-grid-container');
             const pgControls = document.getElementById('pagination-controls');
             
+            if (!dataBerita || dataBerita.length === 0) {
+                utContainer.innerHTML = '<p class="text-center text-gray-500 w-full py-10">Belum ada berita yang dipublikasikan.</p>';
+                grContainer.innerHTML = '';
+                pgControls.innerHTML = '';
+                return;
+            }
+
             const startIdx = (currentPage - 1) * itemsPerPage;
             const endIdx = startIdx + itemsPerPage;
             const currentData = dataBerita.slice(startIdx, endIdx);
@@ -439,11 +459,11 @@
             utContainer.innerHTML = ''; grContainer.innerHTML = ''; pgControls.innerHTML = '';
             if (currentData.length === 0) return;
 
-            // Render Featured
+            // Render Featured (Berita Utama)
             const fb = currentData[0];
             utContainer.innerHTML = `
-                <article class="group bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 flex flex-col md:flex-row min-h-[350px] hover:shadow-2xl transition-all cursor-pointer">
-                    <div class="w-full md:w-3/5 overflow-hidden"><img src="${fb.gambar}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"></div>
+                <article class="group bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 flex flex-col md:flex-row min-h-[350px] hover:shadow-2xl transition-all cursor-pointer" onclick="bacaBeritaLengkap('${fb.id}')">
+                    <div class="w-full md:w-3/5 overflow-hidden"><img src="${fb.gambar}" onerror="this.src='https://ui-avatars.com/api/?name=Berita&background=0f766e&color=fff'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"></div>
                     <div class="w-full md:w-2/5 p-8 flex flex-col justify-center">
                         <span class="px-3 py-1 bg-blue-100 text-blue-600 text-[10px] font-black uppercase w-fit rounded-lg mb-4 tracking-widest">Utama</span>
                         <h3 class="text-2xl font-bold text-gray-800 mb-4 leading-tight group-hover:text-blue-600 transition-colors">${fb.judul}</h3>
@@ -452,11 +472,11 @@
                     </div>
                 </article>`;
 
-            // Render Grid
+            // Render Grid (Berita Lainnya)
             currentData.slice(1).forEach(b => {
                 grContainer.innerHTML += `
-                    <article class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg group cursor-pointer flex flex-col transition-all">
-                        <div class="h-40 overflow-hidden"><img src="${b.gambar}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"></div>
+                    <article class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg group cursor-pointer flex flex-col transition-all" onclick="bacaBeritaLengkap('${b.id}')">
+                        <div class="h-40 overflow-hidden"><img src="${b.gambar}" onerror="this.src='https://ui-avatars.com/api/?name=Berita&background=0f766e&color=fff'" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"></div>
                         <div class="p-5 flex-grow">
                             <span class="text-[9px] text-gray-400 font-bold uppercase mb-2 block tracking-widest">${b.tanggal}</span>
                             <h4 class="font-bold text-gray-800 text-sm mb-3 group-hover:text-blue-600 line-clamp-2">${b.judul}</h4>
@@ -467,15 +487,44 @@
 
             // Pagination
             const total = Math.ceil(dataBerita.length / itemsPerPage);
-            for (let i = 1; i <= total; i++) {
-                const btn = document.createElement('button');
-                btn.className = `page-num px-4 py-2 rounded-xl border font-bold transition-all ${i === currentPage ? 'active' : 'bg-white text-gray-400 hover:text-blue-600 hover:border-blue-500'}`;
-                btn.innerText = i;
-                btn.onclick = () => { currentPage = i; renderBerita(); document.getElementById('berita').scrollIntoView({ behavior: 'smooth' }); };
-                pgControls.appendChild(btn);
+            if(total > 1) {
+                for (let i = 1; i <= total; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = `page-num px-4 py-2 rounded-xl border font-bold transition-all ${i === currentPage ? 'active' : 'bg-white text-gray-400 hover:text-blue-600 hover:border-blue-500'}`;
+                    btn.innerText = i;
+                    btn.onclick = () => { currentPage = i; renderBerita(); document.getElementById('berita').scrollIntoView({ behavior: 'smooth' }); };
+                    pgControls.appendChild(btn);
+                }
             }
         }
-        renderBerita();
+
+        // Modal Pop-Up untuk membaca isi berita lengkap
+        function bacaBeritaLengkap(id) {
+            const berita = dataBerita.find(b => b.id == id);
+            if (!berita) return;
+
+            const modalHTML = `
+                <div id="modal-berita" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+                        <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                            <h2 class="font-bold text-gray-800 line-clamp-1">${berita.judul}</h2>
+                            <button onclick="document.getElementById('modal-berita').remove()" class="text-3xl text-gray-400 hover:text-gray-800">&times;</button>
+                        </div>
+                        <div class="overflow-y-auto p-6 md:p-10">
+                            <img src="${berita.gambar}" onerror="this.src='https://ui-avatars.com/api/?name=Berita&background=0f766e&color=fff'" class="w-full h-64 md:h-96 object-cover rounded-2xl mb-8 shadow-lg">
+                            <div class="flex gap-4 items-center mb-6 text-sm text-gray-500 font-medium">
+                                <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Berita</span>
+                                <span>${berita.tanggal}</span>
+                            </div>
+                            <div class="prose max-w-none text-gray-600 leading-relaxed text-lg">
+                                ${berita.isi_berita ? berita.isi_berita.replace(/\n/g, '<br>') : 'Isi detail berita belum tersedia.'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
 
         // GEMINI AI INTEGRATION
         const apiKey = "";
